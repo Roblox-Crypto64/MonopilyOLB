@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Monopoly Online Banking</title>
+<style>
+    body { font-family: Arial, sans-serif; background: #f0f0f0; padding: 20px; }
+    h1 { text-align: center; }
+    .player { margin-bottom: 10px; padding: 10px; background: #fff; border-radius: 8px; }
+    button { margin: 5px; padding: 5px 10px; }
+    input[type="number"], input[type="text"] { width: 120px; }
+    #logs { margin-top: 20px; padding: 10px; background: #fff; border-radius: 8px; max-height: 200px; overflow-y: auto; }
+    #logs h3 { margin-top: 0; }
+    .log-entry { font-size: 14px; margin-bottom: 5px; }
+</style>
+</head>
+<body>
+
+<h1>Monopoly Online Banking</h1>
+
+<div>
+    <input type="text" id="playerName" placeholder="Player Name">
+    <input type="number" id="startingBalance" placeholder="Starting Balance">
+    <button onclick="addPlayer()">Add Player</button>
+</div>
+
+<h2>Players</h2>
+<div id="playersContainer"></div>
+
+<div id="logs">
+    <h3>Transaction Logs</h3>
+    <div id="logEntries"></div>
+</div>
+
+<script>
+let players = JSON.parse(localStorage.getItem('monopolyPlayers')) || {};
+let logs = JSON.parse(localStorage.getItem('monopolyLogs')) || [];
+
+// Save players and logs
+function saveData() {
+    localStorage.setItem('monopolyPlayers', JSON.stringify(players));
+    localStorage.setItem('monopolyLogs', JSON.stringify(logs));
+}
+
+// Add a log entry
+function addLog(entry) {
+    logs.unshift(entry); // newest first
+    saveData();
+    renderLogs();
+}
+
+// Render logs
+function renderLogs() {
+    const container = document.getElementById('logEntries');
+    container.innerHTML = '';
+    logs.forEach(log => {
+        const div = document.createElement('div');
+        div.className = 'log-entry';
+        div.textContent = log;
+        container.appendChild(div);
+    });
+}
+
+// Render all players
+function renderPlayers() {
+    const container = document.getElementById('playersContainer');
+    container.innerHTML = '';
+    for (let name in players) {
+        const player = players[name];
+        const div = document.createElement('div');
+        div.className = 'player';
+        div.innerHTML = `
+            <strong>${name}</strong>: $${player.balance.toFixed(2)} <br>
+            <button onclick="updateBalance('${name}', 'add')">Add Money</button>
+            <button onclick="updateBalance('${name}', 'subtract')">Subtract Money</button>
+            <button onclick="transferMoney('${name}')">Transfer Money</button>
+            <button onclick="passGo('${name}')">Pass Go (+$200)</button>
+        `;
+        container.appendChild(div);
+    }
+}
+
+// Add new player
+function addPlayer() {
+    const name = document.getElementById('playerName').value.trim();
+    const balance = parseFloat(document.getElementById('startingBalance').value);
+    if (!name || isNaN(balance)) { alert('Enter valid name and balance.'); return; }
+    if (players[name]) { alert('Player already exists.'); return; }
+    players[name] = { balance: balance };
+    addLog(`Bank: ${name} added with $${balance.toFixed(2)}`);
+    saveData();
+    renderPlayers();
+    renderLogs();
+    document.getElementById('playerName').value = '';
+    document.getElementById('startingBalance').value = '';
+}
+
+// Add or subtract money
+function updateBalance(name, action) {
+    const amount = parseFloat(prompt(`Enter amount to ${action} for ${name}:`));
+    if (isNaN(amount)) return;
+    if (action === 'add') {
+        players[name].balance += amount;
+        addLog(`Bank: ${name} was paid $${amount.toFixed(2)}`);
+    } else if (action === 'subtract') {
+        players[name].balance -= amount;
+        addLog(`Bank: ${name} was charged $${amount.toFixed(2)}`);
+    }
+    saveData();
+    renderPlayers();
+    renderLogs();
+}
+
+// Transfer money between players
+function transferMoney(fromName) {
+    const toName = prompt(`Transfer money from ${fromName} to (enter player name):`);
+    if (!toName || !players[toName]) { alert('Invalid recipient'); return; }
+    if (toName === fromName) { alert('Cannot transfer to yourself'); return; }
+
+    const amount = parseFloat(prompt(`Enter amount to transfer from ${fromName} to ${toName}:`));
+    if (isNaN(amount) || amount <= 0) return;
+    if (players[fromName].balance < amount) { alert('Insufficient funds'); return; }
+
+    players[fromName].balance -= amount;
+    players[toName].balance += amount;
+    addLog(`${fromName} transferred $${amount.toFixed(2)} to ${toName}`);
+    saveData();
+    renderPlayers();
+    renderLogs();
+}
+
+// Pass Go button adds $200 from the bank
+function passGo(name) {
+    players[name].balance += 200;
+    addLog(`Bank: ${name} collected $200 for passing Go`);
+    saveData();
+    renderPlayers();
+    renderLogs();
+}
+
+// Initial render
+renderPlayers();
+renderLogs();
+</script>
+
+</body>
+</html>
