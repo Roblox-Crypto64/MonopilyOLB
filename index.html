@@ -26,20 +26,22 @@
 </head>
 <body>
 
-<div id="monopolyolb-version">Checking version…</div>
+<!-- Add data-version to manually set a version, or leave it blank for latest -->
+<div id="monopolyolb-version" data-version="">Checking version…</div>
 
 <script>
 document.addEventListener("DOMContentLoaded", async () => {
   const el = document.getElementById("monopolyolb-version");
 
-  const apiURL =
-    "https://api.github.com/repos/Roblox-Crypto64/MonopilyOLB/contents/MonopilyOLB";
+  // Read manual override from HTML
+  const forcedVersion = el.dataset.version;
+
+  const apiURL = "https://api.github.com/repos/Roblox-Crypto64/MonopilyOLB/contents/?ref=main";
 
   try {
     const res = await fetch(apiURL, {
       cache: "no-store",
       headers: {
-        "User-Agent": "MonopolyOLB-Version-Checker",
         "Accept": "application/vnd.github+json"
       }
     });
@@ -53,8 +55,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const versions = files
       .map(f => {
-        const m = f.name.match(/(\d+)/);
-        return m ? Number(m[1]) : null;
+        const match = f.name.match(/^Version(\d+)\.html$/i);
+        return match ? Number(match[1]) : null;
       })
       .filter(v => v !== null);
 
@@ -63,7 +65,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       return;
     }
 
-    el.textContent = `MonopolyOLB v${Math.max(...versions)} (latest)`;
+    // Use manual version if set, otherwise pick the highest
+    const version = forcedVersion ? Number(forcedVersion) : Math.max(...versions);
+
+    el.textContent = `MonopolyOLB v${version} (latest)`;
 
   } catch (err) {
     el.textContent = "Version check failed";
@@ -74,6 +79,3 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 </body>
 </html>
-
-
-
