@@ -3,80 +3,77 @@
 <head>
   <meta charset="UTF-8">
   <title>MonopolyOLB</title>
-
-  <!-- Prevent favicon 404 noise -->
   <link rel="icon" href="data:,">
 
   <style>
     body {
-      font-family: system-ui, sans-serif;
-      background: #0f172a;
-      color: #e5e7eb;
+      margin: 0;
+      height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      height: 100vh;
-      margin: 0;
+      background: #0b1020;
+      color: #e5e7eb;
+      font-family: system-ui, sans-serif;
     }
     #monopolyolb-version {
-      font-size: 1.5rem;
+      background: #020617;
       padding: 1rem 1.5rem;
       border-radius: 8px;
-      background: #020617;
-      box-shadow: 0 0 20px rgba(0,0,0,.4);
+      font-size: 1.4rem;
     }
   </style>
 </head>
-
 <body>
 
-  <div id="monopolyolb-version">Checking version…</div>
+<div id="monopolyolb-version">Checking version…</div>
 
-  <script>
-    document.addEventListener("DOMContentLoaded", async () => {
-      const el = document.getElementById("monopolyolb-version");
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+  const el = document.getElementById("monopolyolb-version");
 
-      if (!navigator.onLine) {
-        el.textContent = "Offline – cannot check version";
-        return;
-      }
+  const apiURL =
+    "https://api.github.com/repos/Roblox-Crypto64/MonopilyOLB/contents/MonopilyOLB";
 
-      const apiURL =
-        "https://api.github.com/repos/Roblox-Crypto64/MonopilyOLB/contents/MonopilyOLB";
-
-      try {
-        const res = await fetch(apiURL, { cache: "no-store" });
-
-        if (!res.ok) {
-          el.textContent = "GitHub API unavailable";
-          return;
-        }
-
-        const files = await res.json();
-
-        const versions = files
-          .map(f => {
-            const match = f.name.match(/(\d+)/);
-            return match ? Number(match[1]) : null;
-          })
-          .filter(v => v !== null);
-
-        if (!versions.length) {
-          el.textContent = "No versions found";
-          return;
-        }
-
-        const latest = Math.max(...versions);
-        el.textContent = `MonopolyOLB v${latest} (latest)`;
-
-      } catch (err) {
-        el.textContent = "Version check failed";
-        console.error(err);
+  try {
+    const res = await fetch(apiURL, {
+      cache: "no-store",
+      headers: {
+        "User-Agent": "MonopolyOLB-Version-Checker",
+        "Accept": "application/vnd.github+json"
       }
     });
-  </script>
+
+    if (!res.ok) {
+      el.textContent = `GitHub API error (${res.status})`;
+      return;
+    }
+
+    const files = await res.json();
+
+    const versions = files
+      .map(f => {
+        const m = f.name.match(/(\d+)/);
+        return m ? Number(m[1]) : null;
+      })
+      .filter(v => v !== null);
+
+    if (!versions.length) {
+      el.textContent = "No versions found";
+      return;
+    }
+
+    el.textContent = `MonopolyOLB v${Math.max(...versions)} (latest)`;
+
+  } catch (err) {
+    el.textContent = "Version check failed";
+    console.error(err);
+  }
+});
+</script>
 
 </body>
 </html>
+
 
 
