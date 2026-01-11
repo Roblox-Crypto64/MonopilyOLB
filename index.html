@@ -22,26 +22,34 @@
       background: #0b1020;
       color: #e5e7eb;
       font-family: system-ui, sans-serif;
+      flex-direction: column;
     }
     #monopolyolb-version {
       background: #020617;
       padding: 1rem 1.5rem;
       border-radius: 8px;
       font-size: 1.4rem;
+      margin-bottom: 1rem;
+      transition: opacity 0.3s ease;
+    }
+    #monopolyolb-container {
+      width: 100%;
     }
   </style>
 </head>
 <body>
 
-<!-- Add data-version="1" to manually pin, or leave blank for latest -->
-<div id="monopolyolb-version" data-version="">Checking version…</div>
+<!-- Manual version: add data-version="1", leave blank for latest -->
+<div id="monopolyolb-version" data-version="">Loading version…</div>
+
+<div id="monopolyolb-container"></div>
 
 <script>
 document.addEventListener("DOMContentLoaded", async () => {
-  const el = document.getElementById("monopolyolb-version");
+  const versionEl = document.getElementById("monopolyolb-version");
+  const container = document.getElementById("monopolyolb-container");
 
-  // Manual override from HTML attribute
-  const forcedVersion = el.dataset.version;
+  const forcedVersion = versionEl.dataset.version;
 
   const apiURL = "https://api.github.com/repos/Roblox-Crypto64/MonopilyOLB/contents/?ref=main";
 
@@ -54,7 +62,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 
     if (!res.ok) {
-      el.textContent = `GitHub API error (${res.status})`;
+      versionEl.textContent = `GitHub API error (${res.status})`;
       return;
     }
 
@@ -68,17 +76,31 @@ document.addEventListener("DOMContentLoaded", async () => {
       .filter(v => v !== null);
 
     if (!versions.length) {
-      el.textContent = "No versions found";
+      versionEl.textContent = "No versions found";
       return;
     }
 
-    // Use manual version if set, else pick the highest
     const version = forcedVersion ? Number(forcedVersion) : Math.max(...versions);
+    versionEl.textContent = `MonopolyOLB v${version} (latest)`;
 
-    el.textContent = `MonopolyOLB v${version} (latest)`;
+    // Fetch and inject the HTML
+    const htmlFile = `https://raw.githubusercontent.com/Roblox-Crypto64/MonopilyOLB/main/Version${version}.html`;
+    const htmlRes = await fetch(htmlFile);
+
+    if (!htmlRes.ok) {
+      container.innerHTML = `<p>Failed to load Version${version}.html</p>`;
+      return;
+    }
+
+    const htmlText = await htmlRes.text();
+    container.innerHTML = htmlText;
+
+    // Hide version text after load
+    versionEl.style.opacity = 0;
+    setTimeout(() => versionEl.style.display = "none", 300);
 
   } catch (err) {
-    el.textContent = "Version check failed";
+    versionEl.textContent = "Version check failed";
     console.error(err);
   }
 });
