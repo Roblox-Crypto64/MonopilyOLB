@@ -1,46 +1,82 @@
-<!-- MonopolyOLB Version Detector -->
-<div id="monopolyolb-version" data-version="1"></div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>MonopolyOLB</title>
 
-<script>
-(async () => {
-  const el = document.getElementById("monopolyolb-version");
+  <!-- Prevent favicon 404 noise -->
+  <link rel="icon" href="data:,">
 
-  // OPTIONAL: force a version like data-version="2"
-  const forcedVersion = el.dataset.version;
-
-  const OWNER = "Roblox-Crypto64";
-  const REPO  = "MonopilyOLB";
-  const PATH  = ""; // repo root
-
-  const apiURL = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${PATH}`;
-
-  try {
-    const res = await fetch(apiURL);
-    const files = await res.json();
-
-    const versions = files
-      .map(file => {
-        // pulls numbers from Version1.html → 1
-        const match = file.name.match(/(\d+)/);
-        return match ? Number(match[1]) : null;
-      })
-      .filter(v => v !== null);
-
-    if (!versions.length) {
-      el.textContent = "MonopolyOLB version not detected";
-      return;
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      background: #0f172a;
+      color: #e5e7eb;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
     }
+    #monopolyolb-version {
+      font-size: 1.5rem;
+      padding: 1rem 1.5rem;
+      border-radius: 8px;
+      background: #020617;
+      box-shadow: 0 0 20px rgba(0,0,0,.4);
+    }
+  </style>
+</head>
 
-    const version = forcedVersion
-      ? Number(forcedVersion)
-      : Math.max(...versions);
+<body>
 
-    el.textContent = `MonopolyOLB v${version} (latest)`;
+  <div id="monopolyolb-version">Checking version…</div>
 
-  } catch (e) {
-    el.textContent = "Version lookup failed";
-    console.error(e);
-  }
-})();
-</script>
+  <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+      const el = document.getElementById("monopolyolb-version");
+
+      if (!navigator.onLine) {
+        el.textContent = "Offline – cannot check version";
+        return;
+      }
+
+      const apiURL =
+        "https://api.github.com/repos/Roblox-Crypto64/MonopilyOLB/contents/MonopilyOLB";
+
+      try {
+        const res = await fetch(apiURL, { cache: "no-store" });
+
+        if (!res.ok) {
+          el.textContent = "GitHub API unavailable";
+          return;
+        }
+
+        const files = await res.json();
+
+        const versions = files
+          .map(f => {
+            const match = f.name.match(/(\d+)/);
+            return match ? Number(match[1]) : null;
+          })
+          .filter(v => v !== null);
+
+        if (!versions.length) {
+          el.textContent = "No versions found";
+          return;
+        }
+
+        const latest = Math.max(...versions);
+        el.textContent = `MonopolyOLB v${latest} (latest)`;
+
+      } catch (err) {
+        el.textContent = "Version check failed";
+        console.error(err);
+      }
+    });
+  </script>
+
+</body>
+</html>
+
 
