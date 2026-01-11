@@ -1,0 +1,745 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>Mobile Monopoly — UK — Compact Tile Info</title>
+<style>
+:root{
+  --board-size: calc(min(94vmin, 920px));
+  --muted: #97b0c1;
+  --accent: #ffd662;
+  --shadow: 0 10px 30px rgba(0,0,0,0.6);
+  --card-bg: linear-gradient(180deg,#0f1b26,#07101a);
+  --card-width: 320px;
+  --card-height: 200px;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;background:linear-gradient(180deg,#071028,#081a2a);font-family:Inter,Roboto,Arial,sans-serif;color:#eef}
+.app{min-height:100vh;display:flex;gap:12px;padding:12px;align-items:flex-start;justify-content:center;flex-wrap:wrap}
+
+/* board */
+.board-wrap{width:var(--board-size);max-width:98vmin;position:relative;padding:8px;border-radius:14px;background:linear-gradient(180deg,#0b1b26,#05121a);box-shadow:var(--shadow), inset 0 2px 14px rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03)}
+.board{width:100%;height:100%;display:grid;grid-template-columns:repeat(11,1fr);grid-template-rows:repeat(11,1fr);gap:6px;background:linear-gradient(180deg,#071421,#021017);border-radius:10px;padding:6px}
+
+/* tiles - compact default view */
+.tile{background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));border-radius:10px;position:relative;padding:6px;color:#e9f6ff;font-size:12px;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;min-height:48px;border:1px solid rgba(255,255,255,0.03)}
+.tile.corner{font-weight:700;font-size:12px;align-items:center;justify-content:center;text-align:center;padding:8px}
+.tile .title{font-size:12px;line-height:1.1;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:2px 6px}
+.color-bar{height:14px;border-radius:8px;margin-bottom:8px;width:100%}
+/* horizontal info bar (name | owner) */
+.info-bar{display:flex;gap:8px;align-items:center;justify-content:space-between;padding:4px 6px;background:rgba(0,0,0,0.06);border-radius:8px}
+.info-bar .owner{font-size:11px;color:#cfe;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.info-bar .name-small{font-size:12px;font-weight:700;flex:1;text-align:left;overflow:hidden;text-overflow:ellipsis;margin-right:8px}
+
+/* builds & markers (small, unobtrusive) */
+.builds{position:absolute;right:6px;bottom:6px;display:flex;gap:4px}
+.builds .house{width:8px;height:8px;background:#0a8f2a;border-radius:2px;border:1px solid #053}
+.builds .hotel{width:12px;height:8px;background:#c02b2b;border-radius:2px;border:1px solid #700}
+
+/* tokens */
+.token{width:22px;height:22px;border-radius:50%;position:absolute;transform:translate(-50%,-50%);display:flex;align-items:center;justify-content:center;font-size:12px;color:#08121a;box-shadow:0 6px 18px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.18);border:2px solid rgba(255,255,255,0.8);z-index:800}
+
+/* side panel */
+.side{width:360px;max-width:44vw;min-width:260px;background:linear-gradient(180deg,rgba(10,18,28,0.9),rgba(5,10,14,0.7));border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:12px;box-shadow:var(--shadow)}
+.header{display:flex;justify-content:space-between;align-items:center}
+.header h1{font-size:18px;margin:0}
+.controls{display:flex;gap:8px;flex-wrap:wrap}
+.btn{background:linear-gradient(180deg,#1a6cff,#1560d6);color:white;border:none;padding:10px 14px;border-radius:10px;font-weight:700;min-height:44px;display:inline-flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 6px 18px rgba(10,90,200,0.12)}
+.btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);box-shadow:none}
+.small{padding:8px 10px;font-size:13px;min-height:40px}
+.players-list{display:flex;flex-direction:column;gap:10px;max-height:240px;overflow:auto;padding-right:4px}
+.player-row{display:flex;align-items:center;gap:10px;padding:8px;border-radius:10px;background:linear-gradient(180deg,rgba(255,255,255,0.01),transparent);border:1px solid rgba(255,255,255,0.02)}
+.px{width:14px;height:14px;border-radius:50%;display:inline-block}
+.player-name{font-weight:700}
+.player-money{margin-left:auto;font-weight:800;color:var(--accent)}
+
+/* property list / cards uniform size (card-shaped) */
+.card-size{
+  width:var(--card-width);max-width:94%;
+  height:var(--card-height);min-height:160px;
+  border-radius:12px;background:var(--card-bg);padding:12px;color:#eef;
+  box-shadow:0 20px 60px rgba(0,0,0,0.6);border:1px solid rgba(255,255,255,0.03);
+  display:flex;flex-direction:column;justify-content:flex-start;gap:8px;
+}
+/* property rows in lists should look like cards */
+.prop-row{display:flex;justify-content:space-between;padding:8px;border-radius:10px;background:linear-gradient(180deg,rgba(255,255,255,0.01),transparent);border:1px solid rgba(255,255,255,0.02);margin-bottom:6px}
+.table{width:100%;border-collapse:collapse}
+.table td, .table th{border:1px solid rgba(255,255,255,0.03);padding:6px;text-align:center;font-size:13px}
+
+/* modal */
+.modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:9999;background:linear-gradient(180deg, rgba(0,0,0,0.45), rgba(0,0,0,0.6))}
+.modal.active{display:flex}
+.modal .card{background:var(--card-bg);padding:16px;border-radius:12px;min-width:300px;max-width:94%;color:#eef;box-shadow:0 20px 60px rgba(0,0,0,0.65);border:1px solid rgba(255,255,255,0.02)}
+.input{width:100%;padding:8px;border-radius:8px;border:1px solid #1f3b4b;background:#071a23;color:#dff}
+@media(max-width:920px){.side{width:96vw;max-width:100%}.board-wrap{order:2}}
+.footer{color:var(--muted);font-size:12px;text-align:center;margin-top:8px}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="board-wrap" aria-label="Monopoly board">
+    <div id="board" class="board" role="application" aria-label="Monopoly 11x11 board"></div>
+  </div>
+
+  <div class="side" aria-label="Game controls and player info">
+    <div class="header">
+      <h1>Monopoly — UK (Mobile)</h1>
+      <div><button id="newGameBtn" class="btn small">New Game</button></div>
+    </div>
+
+    <div class="controls" role="toolbar">
+      <button id="rollBtn" class="btn" disabled>Roll Dice</button>
+      <button id="endTurnBtn" class="btn ghost small" disabled>End Turn</button>
+      <button id="tradeBtn" class="btn small" disabled>Trade</button>
+      <button id="mortgageBtn" class="btn small" disabled>Mortgage</button>
+      <button id="buildBtn" class="btn small" disabled>Build</button>
+      <button id="myCardsBtn" class="btn small ghost" disabled>My Cards</button>
+    </div>
+
+    <div>
+      <h3 style="margin:6px 0 4px 0">Players</h3>
+      <div id="playersList" class="players-list" aria-live="polite"></div>
+    </div>
+
+    <div>
+      <h3 style="margin:6px 0 4px 0">Action Log</h3>
+      <div id="log" class="log" aria-live="polite"></div>
+    </div>
+
+    <div class="footer">
+      Default tile view now shows only: color bar, name, owner in a horizontal bar. Click a tile to open a card-shaped modal with full details (rent table, buy/sell/build, mortgage).
+    </div>
+  </div>
+</div>
+
+<div id="modal" class="modal" role="dialog" aria-modal="true">
+  <div id="modalCard" class="card"></div>
+</div>
+
+<script>
+/*
+  This file is an update of the previous single-file Monopoly app.
+  Changes implemented per request:
+  - Default tile display is minimal: color bar, name, owner in a single horizontal bar (compact).
+  - Clicking a property opens a uniform card-shaped modal (.card-size) that contains full info:
+      full property name, owner, price, full rent table (base, 1-4 houses, hotel), mortgage, houses/hotels and action buttons.
+  - Card-shaped modals and property UI panels are the same size for visual consistency.
+  - Existing game mechanics (buy, auction, mortgage, houses, jail choices, dev menu) remain in place.
+  The code keeps modular functions and comments for maintainability.
+*/
+
+/* ---------- Data & helpers (kept minimal and compatible) ---------- */
+function P(name, opts){ return Object.assign({name}, opts); }
+
+const board = [
+  P("GO",{type:"corner",label:"GO"}),
+  P("Old Kent Road",{type:"property",color:"brown",price:60,rent:[2,10,30,90,160,250],houseCost:50,mortgage:30}),
+  P("Community Chest",{type:"chest"}),
+  P("Whitechapel Road",{type:"property",color:"brown",price:60,rent:[4,20,60,180,320,450],houseCost:50,mortgage:30}),
+  P("Income Tax",{type:"tax",amount:200}),
+  P("Kings Cross Station",{type:"railway",price:200,mortgage:100}),
+  P("The Angel Islington",{type:"property",color:"lightblue",price:100,rent:[6,30,90,270,400,550],houseCost:50,mortgage:50}),
+  P("Chance",{type:"chance"}),
+  P("Euston Road",{type:"property",color:"lightblue",price:100,rent:[6,30,90,270,400,550],houseCost:50,mortgage:50}),
+  P("Pentonville Road",{type:"property",color:"lightblue",price:120,rent:[8,40,100,300,450,600],houseCost:50,mortgage:60}),
+  P("Jail / Just Visiting",{type:"corner",label:"Jail"}),
+  P("Pall Mall",{type:"property",color:"pink",price:140,rent:[10,50,150,450,625,750],houseCost:100,mortgage:70}),
+  P("Electric Company",{type:"utility",price:150,mortgage:75}),
+  P("Whitehall",{type:"property",color:"pink",price:140,rent:[10,50,150,450,625,750],houseCost:100,mortgage:70}),
+  P("Northumberland Avenue",{type:"property",color:"pink",price:160,rent:[12,60,180,500,700,900],houseCost:100,mortgage:80}),
+  P("Marylebone Station",{type:"railway",price:200,mortgage:100}),
+  P("Bow Street",{type:"property",color:"orange",price:180,rent:[14,70,200,550,750,950],houseCost:100,mortgage:90}),
+  P("Community Chest",{type:"chest"}),
+  P("Marlborough Street",{type:"property",color:"orange",price:180,rent:[14,70,200,550,750,950],houseCost:100,mortgage:90}),
+  P("Vine Street",{type:"property",color:"orange",price:200,rent:[16,80,220,600,800,1000],houseCost:100,mortgage:100}),
+  P("Free Parking",{type:"corner",label:"Free Parking"}),
+  P("Strand",{type:"property",color:"red",price:220,rent:[18,90,250,700,875,1050],houseCost:150,mortgage:110}),
+  P("Chance",{type:"chance"}),
+  P("Fleet Street",{type:"property",color:"red",price:220,rent:[18,90,250,700,875,1050],houseCost:150,mortgage:110}),
+  P("Trafalgar Square",{type:"property",color:"red",price:240,rent:[20,100,300,750,925,1100],houseCost:150,mortgage:120}),
+  P("Fenchurch St Station",{type:"railway",price:200,mortgage:100}),
+  P("Leicester Square",{type:"property",color:"yellow",price:260,rent:[22,110,330,800,975,1150],houseCost:150,mortgage:130}),
+  P("Coventry Street",{type:"property",color:"yellow",price:260,rent:[22,110,330,800,975,1150],houseCost:150,mortgage:130}),
+  P("Water Works",{type:"utility",price:150,mortgage:75}),
+  P("Piccadilly",{type:"property",color:"yellow",price:280,rent:[24,120,360,850,1025,1200],houseCost:150,mortgage:140}),
+  P("Go To Jail",{type:"corner",label:"Go To Jail"}),
+  P("Regent Street",{type:"property",color:"green",price:300,rent:[26,130,390,900,1100,1275],houseCost:200,mortgage:150}),
+  P("Oxford Street",{type:"property",color:"green",price:300,rent:[26,130,390,900,1100,1275],houseCost:200,mortgage:150}),
+  P("Community Chest",{type:"chest"}),
+  P("Bond Street",{type:"property",color:"green",price:320,rent:[28,150,450,1000,1200,1400],houseCost:200,mortgage:160}),
+  P("Liverpool St Station",{type:"railway",price:200,mortgage:100}),
+  P("Chance",{type:"chance"}),
+  P("Park Lane",{type:"property",color:"darkblue",price:350,rent:[35,175,500,1100,1300,1500],houseCost:200,mortgage:175}),
+  P("Super Tax",{type:"tax",amount:100}),
+  P("Mayfair",{type:"property",color:"darkblue",price:400,rent:[50,200,600,1400,1700,2000],houseCost:200,mortgage:200})
+];
+
+const colorToHex = {
+  brown:"#8b4b2e", lightblue:"#7fc8ff", pink:"#ff7ecb", orange:"#ffb36b",
+  red:"#df5a5a", yellow:"#ffde59", green:"#4db86b", darkblue:"#2b5cff"
+};
+
+/* small decks for demo */
+const chanceDeck = [{text:"Advance to GO. Collect £200.", effect:(g,p)=>{ g.moveTo(p,0); g.credit(p,200); g.log(`${p.name} draws Chance: Advance to GO`) }}];
+const chestDeck = [{text:"Bank error in your favour. Collect £200.", effect:(g,p)=>{ g.credit(p,200); g.log(`${p.name} draws Community Chest: £200`) }}];
+
+/* ---------- Game object (core) ---------- */
+const Game = {
+  players: [],
+  turn: 0,
+  dice: [0,0],
+  board,
+  chanceDeck,
+  chestDeck,
+  modal: null,
+  modalCard: null,
+  boardElem: null,
+  logElem: null,
+  tokensContainer: null,
+  _modalOnClose: null,
+  _lastRollWasDouble: false,
+
+  init(){
+    this.boardElem = document.getElementById('board');
+    this.modal = document.getElementById('modal');
+    this.modalCard = document.getElementById('modalCard');
+    this.logElem = document.getElementById('log');
+    this.tokensContainer = document.querySelector('.board-wrap');
+
+    document.getElementById('newGameBtn').addEventListener('click', ()=> this.newGameModal());
+    document.getElementById('rollBtn').addEventListener('click', ()=> this.rollDice());
+    document.getElementById('endTurnBtn').addEventListener('click', ()=> this.endTurn());
+    document.getElementById('myCardsBtn').addEventListener('click', ()=> this.showMyCards());
+    document.getElementById('mortgageBtn').addEventListener('click', ()=> this.showMortgageModal());
+    document.getElementById('buildBtn').addEventListener('click', ()=> this.showBuildModal());
+    document.getElementById('tradeBtn').addEventListener('click', ()=> this.showTradeModal());
+
+    this.renderBoard();
+
+    // dev menu: Ctrl+D
+    window.addEventListener('keydown', (e)=>{
+      if(e.ctrlKey && (e.key === 'd' || e.key === 'D')){
+        e.preventDefault();
+        const pwd = prompt('Enter dev password:');
+        if(pwd === 'Amywicked2013!') this.openDevMenu();
+        else if(pwd !== null) alert('Incorrect password.');
+      }
+    });
+
+    this.modal.addEventListener('click', (ev)=>{ if(ev.target === this.modal) this.closeModal(); });
+    this.log('Tap New Game to begin.');
+  },
+
+  /* ---------- Board rendering (minimal default info) ---------- */
+  renderBoard(){
+    this.boardElem.innerHTML = '';
+    const mapping = this.generateMapping();
+    for(let r=1;r<=11;r++){
+      for(let c=1;c<=11;c++){
+        const tile = document.createElement('div');
+        tile.className = 'tile';
+        tile.style.gridRow = r;
+        tile.style.gridColumn = c;
+        const mapped = mapping.find(m=>m.row===r && m.col===c);
+        if(mapped){
+          const idx = mapped.index;
+          const data = this.board[idx];
+          tile.dataset.index = idx;
+          // compact default view: color bar + name + horizontal owner bar
+          if(data.type === 'property'){
+            const color = colorToHex[data.color] || '#999';
+            tile.innerHTML = `<div class="color-bar" style="background:${color}"></div>
+              <div class="title">${data.name}</div>
+              <div class="info-bar"><div class="name-small">${data.name}</div><div class="owner" data-owner="${idx}">Owner: —</div></div>
+              <div class="builds"></div>`;
+          } else if(data.type === 'railway' || data.type === 'utility'){
+            tile.innerHTML = `<div class="color-bar" style="background:#222"></div><div class="title">${data.name}</div><div class="info-bar"><div class="name-small">${data.name}</div><div class="owner" data-owner="${idx}">Owner: —</div></div>`;
+          } else if(data.type === 'corner'){
+            tile.classList.add('corner');
+            tile.innerHTML = `<div class="title">${data.label||data.name}</div>`;
+          } else {
+            tile.innerHTML = `<div class="title">${data.name}</div>`;
+          }
+          tile.addEventListener('click', ()=> this.onTileClick(idx));
+        } else {
+          tile.style.background = 'transparent';
+          tile.style.border = 'none';
+        }
+        this.boardElem.appendChild(tile);
+      }
+    }
+    this.updateBoardLabels();
+  },
+
+  generateMapping(){
+    // outer ring clockwise starting bottom-right at index 0
+    const coords = [];
+    for(let col=11; col>=1; col--) coords.push({row:11,col});
+    for(let row=10; row>=1; row--) coords.push({row,col:1});
+    for(let col=2; col<=11; col++) coords.push({row:1,col});
+    for(let row=2; row<=10; row++) coords.push({row,col:11});
+    return coords.slice(0,40).map((p,i)=>({index:i,row:p.row,col:p.col}));
+  },
+
+  updateBoardLabels(){
+    // update owner labels & builds
+    document.querySelectorAll('[data-owner]').forEach(el=>{
+      const idx = Number(el.getAttribute('data-owner'));
+      const t = this.board[idx];
+      el.textContent = t.owner !== undefined ? `Owner: ${this.players[t.owner].name}` : 'Owner: (bank)';
+    });
+    // build markers
+    Array.from(document.querySelectorAll('.tile')).forEach(tile=>{
+      const idx = Number(tile.dataset.index);
+      if(isNaN(idx)) return;
+      const builds = tile.querySelector('.builds');
+      if(!builds) return;
+      builds.innerHTML = '';
+      const t = this.board[idx];
+      if(t.owner !== undefined){
+        const owner = this.players[t.owner];
+        const count = (owner.houses && owner.houses[idx]) || 0;
+        if(count>=1 && count<=4){
+          for(let i=0;i<count;i++){ const d=document.createElement('div'); d.className='house'; builds.appendChild(d); }
+        } else if(count>=5){
+          const d=document.createElement('div'); d.className='hotel'; builds.appendChild(d); }
+      }
+    });
+    this.players.forEach(p=> this.updateToken(p));
+  },
+
+  /* ---------- Tile click: open unified card modal ---------- */
+  onTileClick(idx){
+    const t = this.board[idx];
+    // For properties open full card-shaped modal; for other tiles show small info card
+    if(t.type === 'property'){
+      this.showPropertyCard(idx);
+    } else {
+      const content = document.createElement('div');
+      content.className = 'card-size';
+      content.innerHTML = `<h3 style="word-break:break-word">${t.name}</h3>
+        <p>Type: ${t.type}${t.price?`<br>Price: £${t.price}`:''}</p>
+        <div style="margin-top:auto;display:flex;justify-content:flex-end"><button id="closeInfo" class="btn ghost">Close</button></div>`;
+      this.showModal(content);
+      this.modalCard.querySelector('#closeInfo').addEventListener('click', ()=> this.closeModal());
+    }
+  },
+
+  showPropertyCard(idx){
+    const t = this.board[idx];
+    const ownerName = t.owner !== undefined ? this.players[t.owner].name : '(bank)';
+    const houseCost = t.houseCost || 0;
+    const mortVal = t.mortgage || Math.floor((t.price||0)/2);
+    // construct rent table rows (base, 1-4 houses, hotel) if present
+    const rentRows = [];
+    if(t.rent && t.rent.length >= 6){
+      rentRows.push(['Base', `£${t.rent[0]}`]);
+      for(let i=1;i<=4;i++) rentRows.push([`${i} house${i>1?'s':''}`, `£${t.rent[i]}`]);
+      rentRows.push(['Hotel', `£${t.rent[5]}`]);
+    } else {
+      rentRows.push(['Base', `£${t.rent? t.rent[0] : '-'}`]);
+    }
+
+    const content = document.createElement('div');
+    content.className = 'card-size';
+    content.innerHTML = `<h3 style="word-break:break-word">${t.name}</h3>
+      <div><strong>Owner:</strong> ${ownerName}</div>
+      <div><strong>Color:</strong> ${t.color || '-'}</div>
+      <div><strong>Price:</strong> £${t.price || '-'}</div>
+      <div><strong>Mortgage value:</strong> £${mortVal}</div>
+      <div style="margin-top:8px"><strong>Rent Table</strong>
+        <table class="table" style="margin-top:6px"><thead><tr><th>Condition</th><th>Rent</th></tr></thead>
+          <tbody id="rentTable"></tbody></table>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px">
+        <button id="buyBtn" class="btn">Buy</button>
+        <button id="mortBtn" class="btn ghost">Mortgage</button>
+        <button id="buildBtnLocal" class="btn ghost">Build</button>
+        <button id="closeCard" class="btn ghost">Close</button>
+      </div>`;
+
+    this.showModal(content);
+    const tbody = this.modalCard.querySelector('#rentTable');
+    rentRows.forEach(r => { const tr = document.createElement('tr'); tr.innerHTML = `<td>${r[0]}</td><td>${r[1]}</td>`; tbody.appendChild(tr); });
+
+    // Wire action buttons (Buy only appears if unowned)
+    const buyBtn = this.modalCard.querySelector('#buyBtn');
+    const mortBtn = this.modalCard.querySelector('#mortBtn');
+    const buildBtnLocal = this.modalCard.querySelector('#buildBtnLocal');
+
+    if(t.owner !== undefined) { buyBtn.style.display = 'none'; }
+    buyBtn.addEventListener('click', ()=>{
+      const player = this.players[this.turn];
+      if(!player) return;
+      if(t.owner !== undefined){ alert('Already owned.'); return; }
+      if(player.money < t.price){ alert('Insufficient funds'); return; }
+      this.requirePin(player, 'confirm purchase', ()=> {
+        this.debit(player, t.price);
+        t.owner = player.id;
+        player.properties.push(idx);
+        this.log(`${player.name} bought ${t.name} for £${t.price}`);
+        this.updateBoardLabels(); this.updatePlayersPanel();
+        this.closeModal();
+      });
+    });
+
+    mortBtn.addEventListener('click', ()=>{
+      const player = this.players[this.turn];
+      if(!player) return;
+      if(t.owner !== player.id){ alert('You do not own this property'); return; }
+      if(t.mortgaged){
+        const cost = Math.ceil(mortVal * 1.1);
+        if(player.money < cost){ alert('Insufficient funds to unmortgage'); return; }
+        this.requirePin(player, 'confirm unmortgage', ()=> {
+          this.debit(player, cost); t.mortgaged = false; this.log(`${player.name} unmortgaged ${t.name} for £${cost}`); this.updateBoardLabels(); this.updatePlayersPanel(); this.closeModal();
+        });
+      } else {
+        // cannot mortgage if there are houses
+        const houses = (player.houses && player.houses[idx]) || 0;
+        if(houses > 0){ alert('Sell houses before mortgaging'); return; }
+        this.requirePin(player, 'confirm mortgage', ()=> {
+          t.mortgaged = true; player.money += mortVal; this.log(`${player.name} mortgaged ${t.name} for £${mortVal}`); this.updateBoardLabels(); this.updatePlayersPanel(); this.closeModal();
+        });
+      }
+    });
+
+    buildBtnLocal.addEventListener('click', ()=>{
+      const player = this.players[this.turn];
+      if(!player) return;
+      if(t.owner !== player.id){ alert('You do not own this property'); return; }
+      if(!this.ownsFullColor(player, t.color)){ alert('You must own full color group to build'); return; }
+      const cost = t.houseCost || 0;
+      if(player.money < cost){ alert('Insufficient funds'); return; }
+      this.requirePin(player, 'confirm build', ()=> {
+        player.houses[idx] = ((player.houses && player.houses[idx]) || 0) + 1;
+        this.debit(player, cost); this.log(`${player.name} built a house on ${t.name} for £${cost}`); this.updateBoardLabels(); this.updatePlayersPanel(); this.closeModal();
+      });
+    });
+
+    this.modalCard.querySelector('#closeCard').addEventListener('click', ()=> this.closeModal());
+  },
+
+  ownsFullColor(player, color){
+    const group = this.board.reduce((acc,b,i)=>{ if(b.type==='property' && b.color === color) acc.push(i); return acc; },[]);
+    return group.length > 0 && group.every(i => this.board[i].owner === player.id);
+  },
+
+  /* ---------- Simple buy/money helpers & modals ---------- */
+  showModal(node){
+    // keep onClose if previously set; caller may set Game._modalOnClose before calling.
+    this.modal.classList.add('active');
+    this.modalCard.innerHTML = '';
+    this.modalCard.appendChild(node);
+  },
+
+  setModalOnClose(cb){ this._modalOnClose = typeof cb === 'function' ? cb : null; },
+
+  closeModal(){
+    this.modal.classList.remove('active');
+    this.modalCard.innerHTML = '';
+    if(this._modalOnClose){ try{ this._modalOnClose(); }catch(e){ console.error(e); } this._modalOnClose = null; }
+  },
+
+  requirePin(player, reason, onSuccess){
+    if(!player.pin || player.pin.length === 0){
+      if(confirm(`${player.name} has no PIN set. Continue to ${reason}?`)) onSuccess();
+      else this.log('Action cancelled.');
+      return;
+    }
+    const content = document.createElement('div');
+    content.className = 'card-size';
+    content.innerHTML = `<h3>Authorize</h3><p>Enter PIN to ${reason} — ${player.name}</p><input id="authPin" class="input" type="password" placeholder="PIN">
+      <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:8px"><button id="ok" class="btn">OK</button><button id="cancel" class="btn ghost">Cancel</button></div>`;
+    this.showModal(content);
+    this.modalCard.querySelector('#cancel').addEventListener('click', ()=> this.closeModal());
+    this.modalCard.querySelector('#ok').addEventListener('click', ()=>{
+      const v = this.modalCard.querySelector('#authPin').value || '';
+      if(v === player.pin){ this.closeModal(); onSuccess(); } else alert('Incorrect PIN.');
+    });
+  },
+
+  debit(player, amt){ player.money -= amt; this.log(`${player.name} pays £${amt}`); this.updatePlayersPanel(); },
+  credit(player, amt){ player.money += amt; this.log(`${player.name} receives £${amt}`); this.updatePlayersPanel(); },
+
+  /* ---------- Tile purchase/auction and other game features (kept from previous implementation) ---------- */
+  offerPurchase(player, idx){
+    const t = this.board[idx];
+    if(t.owner !== undefined) return;
+    const price = t.price || 0;
+    const content = document.createElement('div');
+    content.className = 'card-size';
+    content.innerHTML = `<h3>Buy ${t.name}?</h3><p>Price: £${price}</p><div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
+      <button id="buy" class="btn">Buy</button><button id="auction" class="btn ghost">Auction</button><button id="decline" class="btn ghost">Decline</button></div>`;
+    this.setModalOnClose(()=> {
+      if(this._lastRollWasDouble){ document.getElementById('rollBtn').disabled = false; document.getElementById('endTurnBtn').disabled = true; this.log('Extra roll allowed (previous roll was a double).'); } else { document.getElementById('rollBtn').disabled = true; document.getElementById('endTurnBtn').disabled = false; }
+    });
+    this.showModal(content);
+    this.modalCard.querySelector('#buy').addEventListener('click', ()=> {
+      if(player.money < price){ alert('Insufficient funds'); return; }
+      this.requirePin(player, 'confirm purchase', ()=> {
+        this.debit(player, price); t.owner = player.id; player.properties.push(idx);
+        this.log(`${player.name} bought ${t.name} for £${price}`); this.closeModal(); this.updateBoardLabels(); this.updatePlayersPanel();
+      });
+    });
+    this.modalCard.querySelector('#auction').addEventListener('click', ()=> { this.closeModal(); this.startAuction(idx); });
+    this.modalCard.querySelector('#decline').addEventListener('click', ()=> { this.closeModal(); this.startAuction(idx); });
+  },
+
+  startAuction(idx){ /* (same fixed auction from prior code) */
+    const t = this.board[idx];
+    this.log(`Auction started for ${t.name}`);
+    const active = new Set(this.players.filter(p=>!p.bankrupt).map(p=>p.id));
+    let currentBid = 0; let highest = null;
+    const content = document.createElement('div');
+    content.className = 'card-size';
+    content.innerHTML = `<h3>Auction: ${t.name}</h3><div id="info" style="margin:8px 0;padding:8px;background:#031a22;border-radius:8px;color:#cfe"></div>
+      <div style="display:flex;gap:8px;align-items:center"><label style="min-width:60px">Bidder:</label><select id="bidder" class="input">${this.players.filter(p=>!p.bankrupt).map(p=>`<option value="${p.id}">${p.name}</option>`)}</select></div>
+      <div style="display:flex;gap:8px;align-items:center;margin-top:8px"><label style="min-width:60px">Amount:</label><input id="amount" class="input" type="number" min="1" value="${Math.max(1,t.price||1)}"><button id="place" class="btn" style="margin-left:auto">Place Bid</button><button id="pass" class="btn ghost">Pass</button></div>
+      <div style="display:flex;justify-content:flex-end;margin-top:10px"><button id="cancel" class="btn ghost">Cancel Auction</button></div>`;
+    this.showModal(content);
+    const info = this.modalCard.querySelector('#info');
+    const updateInfo = ()=> info.innerHTML = `Current bid: £${currentBid} ${highest!==null?`by ${this.players[highest].name}`:''}<br>Active bidders: ${Array.from(active).map(id=>this.players[id].name).join(', ')}`;
+    updateInfo();
+    this.modalCard.querySelector('#place').addEventListener('click', ()=>{
+      const bidderId = Number(this.modalCard.querySelector('#bidder').value); if(!active.has(bidderId)){ alert('Bidder already passed'); return; }
+      const amt = Number(this.modalCard.querySelector('#amount').value||0); if(amt <= currentBid){ alert('Bid must be higher'); return; }
+      const player = this.players[bidderId]; if(player.money < amt){ alert('Bidder lacks funds'); return; }
+      currentBid = amt; highest = bidderId; this.log(`${player.name} bids £${amt} on ${t.name}`); updateInfo();
+    });
+    this.modalCard.querySelector('#pass').addEventListener('click', ()=>{
+      const bidderId = Number(this.modalCard.querySelector('#bidder').value); if(active.has(bidderId)){ active.delete(bidderId); this.log(`${this.players[bidderId].name} passes`); updateInfo(); }
+      if(active.size <= 1){
+        if(highest !== null && currentBid>0){
+          const winner = this.players[highest];
+          if(winner.money >= currentBid){ this.debit(winner, currentBid); t.owner = winner.id; winner.properties.push(idx); this.log(`${winner.name} won auction for ${t.name} at £${currentBid}`); }
+          else this.log(`${winner.name} cannot pay; auction ends without sale.`);
+        } else this.log(`Auction ended with no bids for ${t.name}`);
+        this.closeModal(); this.updateBoardLabels(); this.updatePlayersPanel();
+      }
+    });
+    this.modalCard.querySelector('#cancel').addEventListener('click', ()=> { this.log('Auction cancelled'); this.closeModal(); });
+  },
+
+  /* ---------- Simplified cards & turn management ---------- */
+  drawCard(type, player){ const deck = type==='chance' ? this.chanceDeck : this.chestDeck; if(!deck || deck.length===0) return; const card = deck.shift(); const content = document.createElement('div'); content.className='card-size'; content.innerHTML = `<h3>${type==='chance'?'Chance':'Community Chest'}</h3><p style="min-height:60px">${card.text}</p><div style="display:flex;justify-content:flex-end"><button id="apply" class="btn">Apply</button></div>`; this.showModal(content); this.modalCard.querySelector('#apply').addEventListener('click', ()=> { try{ card.effect(this, player) }catch(e){console.error(e)} this.closeModal(); this.updateBoardLabels(); this.updatePlayersPanel(); }); },
+
+  endTurn(){ this._lastRollWasDouble = false; const n = this.players.length; do{ this.turn = (this.turn + 1) % n; } while(this.players[this.turn].bankrupt); this.log(`It's now ${this.players[this.turn].name}'s turn.`); this.updatePlayersPanel(); this.enableControls(); },
+
+  enableControls(){ document.getElementById('rollBtn').disabled = false; document.getElementById('endTurnBtn').disabled = true; document.getElementById('tradeBtn').disabled = false; document.getElementById('mortgageBtn').disabled = false; document.getElementById('buildBtn').disabled = false; document.getElementById('myCardsBtn').disabled = false; },
+
+  rollDice(){
+    const p = this.players[this.turn];
+    if(!p || p.bankrupt) { this.endTurn(); return; }
+    if(p.jailed){
+      const d1 = 1+Math.floor(Math.random()*6); const d2 = 1+Math.floor(Math.random()*6); this.dice = [d1,d2]; this.log(`${p.name} rolls ${d1} & ${d2} (in jail)`); 
+      if(d1===d2){ p.jailed = false; p.jailTurns = 0; this.log(`${p.name} rolled doubles and gets out`); this.move(p, d1+d2); return; }
+      else { this.showJailChoiceModal(p, d1, d2); return; }
+    }
+    const d1 = 1+Math.floor(Math.random()*6); const d2 = 1+Math.floor(Math.random()*6); this.dice = [d1,d2]; this._lastRollWasDouble = (d1===d2); this.log(`${p.name} rolls ${d1} & ${d2}${d1===d2?' — doubles!':''}`); this.move(p, d1+d2);
+    if(d1===d2 && !p.jailed && !p.bankrupt){ if(!this.modal.classList.contains('active')){ this.log(`${p.name} rolled doubles — may roll again.`); document.getElementById('rollBtn').disabled = false; document.getElementById('endTurnBtn').disabled = true; } p._consecDoubles = (p._consecDoubles||0) + 1; if(p._consecDoubles >= 3){ this.log(`${p.name} rolled doubles 3 times — go to jail`); this.offerUseGoofBeforeJail(p); } } else { p._consecDoubles = 0; document.getElementById('rollBtn').disabled = true; document.getElementById('endTurnBtn').disabled = false; }
+  },
+
+  move(player, steps){
+    const old = player.position; const newPos = (player.position + steps + 40) % 40;
+    if(steps > 0 && newPos < old){ this.credit(player, 200); this.log(`${player.name} passed GO and collected £200`); }
+    player.position = newPos; this.updateToken(player); this.log(`${player.name} moves to ${this.board[newPos].name}`); this.handleLanding(player); this.updateBoardLabels();
+  },
+
+  handleLanding(player){
+    const t = this.board[player.position];
+    if(t.type === 'property'){ if(t.owner === undefined) this.offerPurchase(player, player.position); else if(t.owner !== player.id && !t.mortgaged){ const owner = this.players[t.owner]; const amt = this.calculateRent(t, player); this.log(`${player.name} must pay £${amt} to ${owner.name}`); this.transfer(player, owner, amt); } }
+    else if(t.type === 'railway'){ if(t.owner === undefined) this.offerPurchase(player, player.position); else if(t.owner !== player.id && !t.mortgaged){ const owner = this.players[t.owner]; const count = this.players[t.owner].properties.filter(i=>this.board[i].type==='railway').length; const rent = 25 * Math.pow(2, count-1); this.log(`${player.name} pays £${rent} to ${owner.name} (railway)`); this.transfer(player, owner, rent); } }
+    else if(t.type === 'utility'){ if(t.owner === undefined) this.offerPurchase(player, player.position); else if(t.owner !== player.id && !t.mortgaged){ const owner = this.players[t.owner]; const count = this.players[t.owner].properties.filter(i=>this.board[i].type==='utility').length; const multiplier = (count===1?4:10); const diceTotal = this.dice[0]+this.dice[1] || 7; const rent = multiplier * diceTotal; this.log(`${player.name} pays £${rent} to ${owner.name} (utility)`); this.transfer(player, owner, rent); } }
+    else if(t.type === 'tax'){ this.debit(player, t.amount); }
+    else if(t.type === 'chance'){ this.drawCard('chance', player); }
+    else if(t.type === 'chest'){ this.drawCard('chest', player); }
+    else if(t.type === 'corner' && t.label === 'Go To Jail'){ this.offerUseGoofBeforeJail(player); }
+    // check bankruptcy lightly
+    if(player.money <= 0) this.openBankruptcyModal(player);
+  },
+
+  calculateRent(tile, payer){
+    if(tile.mortgaged) return 0;
+    if(tile.type === 'property'){
+      const owner = this.players[tile.owner];
+      const houses = (owner.houses && owner.houses[tile.index]) || 0;
+      const base = tile.rent ? tile.rent[houses] : 0;
+      const group = this.board.reduce((acc,b,i)=>{ if(b.type==='property' && b.color===tile.color) acc.push(i); return acc; },[]);
+      const ownsAll = group.length > 0 && group.every(i=> this.board[i].owner === owner.id);
+      return (houses===0 && ownsAll) ? base*2 : base;
+    }
+    return 0;
+  },
+
+  /* ---------- Jail choices (pay/use card/stay) ---------- */
+  offerUseGoofBeforeJail(player){
+    if(player.jailFree && player.jailFree > 0){
+      const content = document.createElement('div');
+      content.className = 'card-size';
+      content.innerHTML = `<h3>Get Out of Jail Free</h3><p>${player.name}, you have ${player.jailFree} GOOJF(s). Use one to avoid jail?</p><div style="display:flex;justify-content:flex-end;gap:8px"><button id="use" class="btn">Use</button><button id="keep" class="btn ghost">Keep</button></div>`;
+      this.showModal(content);
+      this.modalCard.querySelector('#keep').addEventListener('click', ()=> { this.closeModal(); this.sendToJailConfirmed(player); });
+      this.modalCard.querySelector('#use').addEventListener('click', ()=> { player.jailFree--; this.log(`${player.name} used a GOOJF and avoids jail`); this.closeModal(); });
+    } else this.sendToJailConfirmed(player);
+  },
+
+  sendToJailConfirmed(player){ player.position = 10; player.jailed = true; player.jailTurns = 0; player._consecDoubles = 0; this.updateToken(player); this.log(`${player.name} is sent to Jail`); document.getElementById('rollBtn').disabled = true; document.getElementById('endTurnBtn').disabled = false; this.updatePlayersPanel(); },
+
+  showJailChoiceModal(player, d1, d2){
+    const content = document.createElement('div');
+    content.className = 'card-size';
+    content.innerHTML = `<h3>Jail Options</h3><p>${player.name}, you rolled ${d1} & ${d2} (not doubles). Choose:</p>
+      <div style="display:flex;justify-content:flex-end;gap:8px"><button id="pay50" class="btn">Pay £50</button><button id="useGo" class="btn ghost">Use GOOJF</button><button id="stay" class="btn ghost">Stay</button></div>`;
+    this.showModal(content);
+    this.modalCard.querySelector('#pay50').addEventListener('click', ()=>{
+      if(player.money < 50){
+        const ok = this.autoMortgageUntil(player, 50 - player.money);
+        if(!ok){ alert('Cannot raise funds'); this.closeModal(); this.openBankruptcyModal(player); return; }
+      }
+      this.debit(player, 50); player.jailed = false; player.jailTurns=0; this.move(player, d1+d2); this.closeModal();
+    });
+    this.modalCard.querySelector('#useGo').addEventListener('click', ()=> {
+      if(player.jailFree && player.jailFree>0){ player.jailFree--; player.jailed=false; this.log(`${player.name} used a GOOJF and is free`); this.closeModal(); } else alert('No GOOJF available');
+    });
+    this.modalCard.querySelector('#stay').addEventListener('click', ()=> { player.jailTurns++; this.log(`${player.name} stays in jail (turn ${player.jailTurns})`); this.closeModal(); document.getElementById('rollBtn').disabled = true; document.getElementById('endTurnBtn').disabled = false; });
+  },
+
+  /* ---------- Bankruptcy modal (trimmed) ---------- */
+  openBankruptcyModal(player, creditor){
+    // If player already bankrupt, nothing
+    if(player.bankrupt) return;
+    const content = document.createElement('div');
+    content.className = 'card-size';
+    content.innerHTML = `<h3>Bankruptcy — ${player.name}</h3><p>Your balance is £${player.money}. Mortgage properties to raise funds (minimum balance is £1 required to continue). If you cannot raise funds declare bankruptcy.</p>
+      <div style="max-height:220px;overflow:auto;margin-top:8px" id="bankList"></div>
+      <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:8px"><button id="declare" class="btn">Declare Bankruptcy</button><button id="closeB" class="btn ghost">Close</button></div>`;
+    this.showModal(content);
+    const list = this.modalCard.querySelector('#bankList');
+    if(player.properties.length === 0) list.innerHTML = '<p>No properties to mortgage.</p>';
+    player.properties.forEach(idx=>{
+      const t = this.board[idx];
+      const btn = document.createElement('button'); btn.className='btn small'; btn.textContent = t.mortgaged ? 'Unmortgage' : 'Mortgage'; btn.dataset.idx = idx;
+      const row = document.createElement('div'); row.className='prop-row';
+      row.innerHTML = `<div style="flex:1"><strong>${t.name}</strong><div style="font-size:12px;color:#9fb3c6">Mortgage: £${t.mortgage || Math.floor(t.price/2)}</div></div>`;
+      row.appendChild(btn);
+      list.appendChild(row);
+      btn.addEventListener('click', ()=> {
+        const idx = Number(btn.dataset.idx);
+        const tile = this.board[idx];
+        if(tile.mortgaged){
+          const cost = Math.ceil((tile.mortgage || Math.floor(tile.price/2)) * 1.1);
+          if(player.money < cost){ alert('Insufficient funds'); return; }
+          this.requirePin(player, 'confirm unmortgage', ()=> { this.debit(player, cost); tile.mortgaged = false; this.log(`${player.name} unmortgaged ${tile.name} for £${cost}`); this.updateBoardLabels(); this.updatePlayersPanel(); this.closeModal(); });
+        } else {
+          const houses = (player.houses && player.houses[idx]) || 0;
+          if(houses > 0){ alert('Sell houses first'); return; }
+          this.requirePin(player, 'confirm mortgage', ()=> { tile.mortgaged = true; const val = tile.mortgage || Math.floor(tile.price/2); player.money += val; this.log(`${player.name} mortgaged ${tile.name} for £${val}`); this.updateBoardLabels(); this.updatePlayersPanel(); this.closeModal(); });
+        }
+      });
+    });
+    this.modalCard.querySelector('#declare').addEventListener('click', ()=> { this.declareBankruptcy(player, creditor); this.closeModal(); });
+    this.modalCard.querySelector('#closeB').addEventListener('click', ()=> this.closeModal());
+  },
+
+  declareBankruptcy(player, creditor){
+    player.bankrupt = true; this.log(`${player.name} declared bankrupt.`);
+    if(creditor && creditor.id !== undefined){ player.properties.forEach(idx=>{ this.board[idx].owner = creditor.id; creditor.properties.push(idx); }); }
+    else { player.properties.forEach(idx=>{ this.board[idx].owner = undefined; this.board[idx].mortgaged = false; }); }
+    player.properties = []; const token = document.getElementById(`token-${player.id}`); if(token) token.remove(); this.updateBoardLabels(); this.updatePlayersPanel();
+  },
+
+  /* ---------- Misc helpers ---------- */
+  transfer(from, to, amt){ if(from.money >= amt){ this.debit(from, amt); this.credit(to, amt); } else { const ok = this.autoMortgageUntil(from, amt - from.money); if(ok && from.money >= amt){ this.debit(from, amt); this.credit(to, amt); } else this.openBankruptcyModal(from, to); } },
+
+  autoMortgageUntil(player, shortfall){
+    const candidates = player.properties.filter(i=> !this.board[i].mortgaged).sort((a,b)=> this.board[b].price - this.board[a].price);
+    let got=0;
+    for(const idx of candidates){
+      const houses = (player.houses && player.houses[idx]) || 0;
+      if(houses > 0) continue;
+      const val = Math.floor(this.board[idx].mortgage || this.board[idx].price/2);
+      this.board[idx].mortgaged = true; player.money += val; got += val; this.log(`${player.name} auto-mortgaged ${this.board[idx].name} for £${val}`);
+      if(got >= shortfall) return true;
+    }
+    return player.money >= shortfall;
+  },
+
+  /* ---------- Player UI & setup ---------- */
+  newGameModal(){
+    const content = document.createElement('div');
+    content.className = 'card-size';
+    content.innerHTML = `<h3>New Game Setup</h3><div style="display:flex;gap:8px"><label>Players: <select id="num" class="input">${[2,3,4,5,6].map(n=>`<option value="${n}">${n}</option>`)}</select></label></div><div id="cfg" style="margin-top:8px"></div><div style="display:flex;justify-content:flex-end;gap:8px;margin-top:8px"><button id="start" class="btn">Start</button><button id="cancel" class="btn ghost">Cancel</button></div>`;
+    this.showModal(content);
+    const cfg = this.modalCard.querySelector('#cfg');
+    const num = this.modalCard.querySelector('#num');
+    const defaults = ['#ffd662','#7fd3ff','#ff9dd8','#9dffb1','#bfb3ff','#ffb58a'];
+    const build = (n)=>{ cfg.innerHTML=''; for(let i=0;i<n;i++){ const d=document.createElement('div'); d.style.display='flex'; d.style.gap='8px'; d.style.margin='6px 0'; d.innerHTML = `<input class="input name" placeholder="Player ${i+1}" value="Player ${i+1}" style="flex:1"><input type="color" class="color" value="${defaults[i]}"><input class="input pin" placeholder="PIN (optional)" style="width:110px">`; cfg.appendChild(d);} };
+    build(2);
+    num.addEventListener('change', ()=> build(Number(num.value)));
+    this.modalCard.querySelector('#cancel').addEventListener('click', ()=> this.closeModal());
+    this.modalCard.querySelector('#start').addEventListener('click', ()=> {
+      const names = Array.from(this.modalCard.querySelectorAll('.name')).map(n=>n.value||'Player');
+      const colors = Array.from(this.modalCard.querySelectorAll('.color')).map(n=>n.value||'#fff');
+      const pins = Array.from(this.modalCard.querySelectorAll('.pin')).map(n=>n.value||'');
+      const cfgs = names.map((name,i)=>({name, color:colors[i], pin:pins[i]}));
+      this.closeModal(); this.resetGame(); this.createPlayers(cfgs);
+    });
+  },
+
+  createPlayers(cfg){
+    this.players = [];
+    for(let i=0;i<cfg.length;i++){
+      this.players.push({ id:i, name:cfg[i].name||`Player ${i+1}`, color:cfg[i].color||'#ffd662', money:1500, position:0, properties:[], houses:{}, jailed:false, jailTurns:0, jailFree:0, pin:cfg[i].pin||'', bankrupt:false, _consecDoubles:0 });
+    }
+    this.turn = 0;
+    this.clearTokens();
+    this.players.forEach(p=> this.createToken(p));
+    this.updatePlayersPanel();
+    this.updateBoardLabels();
+    this.enableControls();
+    this.log(`Game started: ${this.players.map(p=>p.name).join(', ')}`);
+  },
+
+  createToken(player){ const e = document.createElement('div'); e.className = 'token'; e.id = `token-${player.id}`; e.style.background = player.color; e.textContent = player.name[0]||'P'; e.title = player.name; this.tokensContainer.appendChild(e); this.updateToken(player); },
+
+  clearTokens(){ document.querySelectorAll('.token').forEach(t=>t.remove()); },
+
+  updateToken(player){
+    const token = document.getElementById(`token-${player.id}`); if(!token) return;
+    const tile = Array.from(this.boardElem.children).find(n=> Number(n.dataset.index) === player.position); if(!tile) return;
+    const rect = tile.getBoundingClientRect(); const boardRect = this.tokensContainer.getBoundingClientRect(); const same = this.players.filter(p=>p.position===player.position && !p.bankrupt); const idx = same.findIndex(p=>p.id===player.id); const offsetX = (idx%3)*22 - 22; const offsetY = Math.floor(idx/3)*20 - 20;
+    token.style.left = `${rect.left - boardRect.left + rect.width/2 + offsetX}px`; token.style.top = `${rect.top - boardRect.top + rect.height/2 + offsetY}px`;
+  },
+
+  updatePlayersPanel(){
+    const el = document.getElementById('playersList'); el.innerHTML = '';
+    this.players.forEach((p,i)=>{
+      const r = document.createElement('div'); r.className='player-row';
+      const gojf = (p.jailFree||0)>0 ? `<small style="margin-left:6px;background:#112b1a;padding:3px 6px;border-radius:6px;color:#bff">GOOJFF×${p.jailFree}</small>` : '';
+      r.innerHTML = `<div class="px" style="background:${p.color}"></div><div style="min-width:120px"><div class="player-name">${p.name} ${i===this.turn?'<span style="color:var(--accent)">⇨</span>':''}</div><div style="font-size:12px;color:#9fb3c6">Pos: ${p.position} ${this.board[p.position].name} ${gojf}</div></div><div class="player-money">£${p.money}</div>`;
+      el.appendChild(r);
+    });
+  },
+
+  /* ---------- Developer menu (Ctrl+D) - small helper ---------- */
+  openDevMenu(){
+    const content = document.createElement('div'); content.className='card-size';
+    content.innerHTML = `<h3>Dev Menu</h3><div style="display:flex;gap:8px"><select id="devPlayer" class="input">${this.players.map(p=>`<option value="${p.id}">${p.name}</option>`)}</select><input id="devAmount" class="input" type="number" value="100"></div><div style="display:flex;justify-content:flex-end;gap:8px;margin-top:8px"><button id="add" class="btn">Add</button><button id="sub" class="btn ghost">Subtract</button><button id="assign" class="btn ghost">Assign Property</button><button id="closeDev" class="btn ghost">Close</button></div><div style="margin-top:8px"><input id="propId" class="input" type="number" placeholder="Property index (0-39)"></div>`;
+    this.showModal(content);
+    this.modalCard.querySelector('#closeDev').addEventListener('click', ()=> this.closeModal());
+    this.modalCard.querySelector('#add').addEventListener('click', ()=> { const pid=Number(this.modalCard.querySelector('#devPlayer').value); const amt=Number(this.modalCard.querySelector('#devAmount').value||0); this.credit(this.players[pid], amt); this.log(`Dev: added £${amt} to ${this.players[pid].name}`); });
+    this.modalCard.querySelector('#sub').addEventListener('click', ()=> { const pid=Number(this.modalCard.querySelector('#devPlayer').value); const amt=Number(this.modalCard.querySelector('#devAmount').value||0); this.debit(this.players[pid], amt); this.log(`Dev: subtracted £${amt} from ${this.players[pid].name}`); });
+    this.modalCard.querySelector('#assign').addEventListener('click', ()=> { const pid=Number(this.modalCard.querySelector('#devPlayer').value); const prop=Number(this.modalCard.querySelector('#propId').value); if(isNaN(prop)||prop<0||prop>39){ alert('Invalid property index'); return; } const old=this.board[prop].owner; if(old!==undefined){ const arr=this.players[old].properties; const i=arr.indexOf(prop); if(i>=0) arr.splice(i,1); } this.board[prop].owner = pid; this.players[pid].properties.push(prop); this.log(`Dev: assigned ${this.board[prop].name} to ${this.players[pid].name}`); this.updateBoardLabels(); this.updatePlayersPanel(); });
+  },
+
+  /* ---------- Utility ---------- */
+  log(msg){ const p = document.createElement('p'); p.textContent = msg; this.logElem.prepend(p); },
+  resetGame(){ this.board.forEach(b=>{ delete b.owner; delete b.mortgaged; }); this.players = []; this.clearTokens(); this.logElem.innerHTML = ''; this.updateBoardLabels(); this.updatePlayersPanel(); }
+};
+
+/* ---------- Initialize ---------- */
+document.addEventListener('DOMContentLoaded', ()=> { Game.init(); window.Game = Game; });
+</script>
+</body>
+</html>
