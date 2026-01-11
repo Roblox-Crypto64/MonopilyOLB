@@ -5,6 +5,13 @@
   <title>MonopolyOLB</title>
   <link rel="icon" href="data:,">
 
+  <!-- 100% privacy-first analytics -->
+  <script data-collect-dnt="true" async src="https://scripts.simpleanalyticscdn.com/latest.js"></script>
+  <noscript>
+    <img src="https://queue.simpleanalyticscdn.com/noscript.gif?collect-dnt=true" 
+         alt="" referrerpolicy="no-referrer-when-downgrade"/>
+  </noscript>
+
   <style>
     body {
       margin: 0;
@@ -26,14 +33,14 @@
 </head>
 <body>
 
-<!-- Add data-version to manually set a version, or leave it blank for latest -->
+<!-- Add data-version="1" to manually pin, or leave blank for latest -->
 <div id="monopolyolb-version" data-version="">Checking version…</div>
 
 <script>
 document.addEventListener("DOMContentLoaded", async () => {
   const el = document.getElementById("monopolyolb-version");
 
-  // Read manual override from HTML
+  // Manual override from HTML attribute
   const forcedVersion = el.dataset.version;
 
   const apiURL = "https://api.github.com/repos/Roblox-Crypto64/MonopilyOLB/contents/?ref=main";
@@ -65,7 +72,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       return;
     }
 
-    // Use manual version if set, otherwise pick the highest
+    // Use manual version if set, else pick the highest
     const version = forcedVersion ? Number(forcedVersion) : Math.max(...versions);
 
     el.textContent = `MonopolyOLB v${version} (latest)`;
