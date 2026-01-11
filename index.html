@@ -1,1 +1,46 @@
+<!-- MonopolyOLB Version Detector -->
+<div id="monopolyolb-version" data-version=""></div>
+
+<script>
+(async () => {
+  const el = document.getElementById("monopolyolb-version");
+
+  // OPTIONAL: force a version like data-version="2"
+  const forcedVersion = el.dataset.version;
+
+  const OWNER = "Roblox-Crypto64";
+  const REPO  = "MonopilyOLB";
+  const PATH  = ""; // repo root
+
+  const apiURL = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${PATH}`;
+
+  try {
+    const res = await fetch(apiURL);
+    const files = await res.json();
+
+    const versions = files
+      .map(file => {
+        // pulls numbers from Version1.html → 1
+        const match = file.name.match(/(\d+)/);
+        return match ? Number(match[1]) : null;
+      })
+      .filter(v => v !== null);
+
+    if (!versions.length) {
+      el.textContent = "MonopolyOLB version not detected";
+      return;
+    }
+
+    const version = forcedVersion
+      ? Number(forcedVersion)
+      : Math.max(...versions);
+
+    el.textContent = `MonopolyOLB v${version} (latest)`;
+
+  } catch (e) {
+    el.textContent = "Version lookup failed";
+    console.error(e);
+  }
+})();
+</script>
 
